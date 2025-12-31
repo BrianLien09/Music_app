@@ -68,7 +68,7 @@ function init() {
     
     // Playlist Toggle
     playlistBtn.addEventListener('click', () => {
-        playlistSidebar.classList.add('active');
+        playlistSidebar.classList.toggle('active'); // Toggle instead of add
     });
     closePlaylistBtn.addEventListener('click', () => {
         playlistSidebar.classList.remove('active');
@@ -159,6 +159,9 @@ function loadSong(index) {
     currentTimeEl.textContent = '0:00';
     isPlaying = false;
     updatePlayIcon();
+    
+    // Reset Lyrics Position
+    lyricsContainer.style.transform = 'translateY(0)';
 }
 
 function prevSong() {
@@ -182,6 +185,7 @@ function nextSong() {
 // Load and Parse Lyrics
 async function loadLyrics(path) {
     lyricsContainer.innerHTML = '<p class="lyrics-placeholder">歌詞載入中...</p>';
+    lyricsContainer.style.transform = 'translateY(0)'; // Reset
     lyricsData = [];
     
     try {
@@ -279,23 +283,33 @@ function syncLyrics(currentTime = audioPlayer.currentTime) {
 
     // Update UI
     const allLines = document.querySelectorAll('.lyrics-line');
-    allLines.forEach(line => line.classList.remove('active'));
+    
+    // Don't redraw if active line hasn't changed to avoid jitter, 
+    // BUT we need to ensure styling is correct if we switched songs
+    // Simple check: see if current active class is on the right index
+    const currentActive = document.querySelector('.lyrics-line.active');
+    const currentActiveIndex = currentActive ? parseInt(currentActive.dataset.index) : -1;
 
-    if (activeIndex !== -1 && activeIndex < allLines.length) {
-        const activeLine = allLines[activeIndex];
-        activeLine.classList.add('active');
+    if (activeIndex !== currentActiveIndex) {
+        allLines.forEach(line => line.classList.remove('active'));
         
-        // Scroll to center
-        const wrapperHeight = lyricsContainer.clientHeight;
-        const lineTop = activeLine.offsetTop;
-        const lineHeight = activeLine.clientHeight;
-        
-        // Ensure offsetParent is valid (e.g., when visible)
-        if (activeLine.offsetParent) {
-             lyricsContainer.scrollTo({
-                top: lineTop - wrapperHeight / 2 + lineHeight / 2,
-                behavior: 'smooth'
-            });
+        if (activeIndex !== -1 && activeIndex < allLines.length) {
+            const activeLine = allLines[activeIndex];
+            activeLine.classList.add('active');
+            
+            // New Transform Logic
+            // We want the active line to be in the center of the lyrics-card
+            // lyrics-wrapper starts at top: 50% (css).
+            // So translateY should be - (line.offsetTop + line.height/2)
+            
+            const lineTop = activeLine.offsetTop;
+            const lineHeight = activeLine.clientHeight;
+            
+            // Because wrapper is top: 50%, a translateY of -(lineTop + lineHeight/2) 
+            // moves that point to the vertical center of the screen.
+            const offset = -(lineTop + lineHeight / 2);
+            
+            lyricsContainer.style.transform = `translateY(${offset}px)`;
         }
     }
 }

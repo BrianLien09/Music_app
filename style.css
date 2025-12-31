@@ -264,19 +264,22 @@ input[type="range"]::-webkit-slider-thumb:hover {
     flex: 1.5;
     height: 100%;
     position: relative;
-    overflow: hidden;
+    overflow: hidden; /* Mask content */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center the wrapper vertically */
 }
 
 .lyrics-wrapper {
-    height: 100%;
-    overflow-y: auto;
+    /* Remove overflow-y and mask */
+    position: absolute;
+    top: 50%; /* Start from center */
+    left: 0;
+    width: 100%;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth physics-like curve */
+    transform: translateY(0);
+    will-change: transform;
     text-align: center;
-    padding: 20px 0;
-    /* Hide scrollbar logic */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
-    mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
 }
 
 .lyrics-wrapper::-webkit-scrollbar {
@@ -284,27 +287,29 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .lyrics-line {
-    padding: 12px 10px;
-    font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.4);
-    transition: all 0.4s ease;
+    padding: 16px 10px; /* Adjusted spacing */
+    font-size: 1.3rem; /* Increased base size (was 1.1rem) */
+    color: rgba(255, 255, 255, 0.6); /* Slightly more visible */
+    transition: all 0.5s ease;
     cursor: pointer;
     border-radius: 8px;
-    min-height: 20px; /* Ensure empty lines take space */
+    /* Removed blur filter */
+    transform: scale(1); /* No shrinking for inactive lines */
 }
 
 .lyrics-line:hover {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.9);
     background: rgba(255, 255, 255, 0.05);
 }
 
 .lyrics-line.active {
     color: var(--text-primary);
-    font-size: 1.4rem;
+    font-size: 1.6rem; 
     font-weight: 700;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-    background: rgba(255, 255, 255, 0.1);
-    transform: scale(1.05);
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+    background: transparent; 
+    transform: scale(1.1);
+    margin: 20px 0; 
 }
 
 /* --- Playlist Sidebar --- */
