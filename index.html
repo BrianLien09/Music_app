@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Glass Music Player</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Material Icons for Buttons -->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="background-animation"></div>
+
+    <div class="container">
+      <!-- Player Card -->
+      <div class="player-card">
+        <div class="player-header">
+            <span class="material-icons-round" id="playlistBtn">queue_music</span>
+        </div>
+        
+        <div class="cover-wrapper">
+          <div class="cover-art" id="coverArt">
+            <!-- Default Cover Icon/Placeholder -->
+            <span class="material-icons-round">music_note</span>
+          </div>
+        </div>
+
+        <div class="song-info">
+          <h1 id="songTitle">Loading Song...</h1>
+          <h2 id="artistName">Artist Name</h2>
+        </div>
+
+        <div class="progress-container">
+          <span id="currentTime">0:00</span>
+          <input type="range" id="progressBar" value="0" min="0" max="100" />
+          <span id="duration">0:00</span>
+        </div>
+
+        <div class="controls">
+          <button class="btn-control icon-small" id="prevBtn">
+            <span class="material-icons-round">skip_previous</span>
+          </button>
+          <button class="btn-control play-btn" id="playBtn">
+            <span class="material-icons-round" id="playIcon">play_arrow</span>
+          </button>
+          <button class="btn-control icon-small" id="nextBtn">
+            <span class="material-icons-round">skip_next</span>
+          </button>
+        </div>
+
+        <div class="volume-container">
+          <span class="material-icons-round">volume_up</span>
+          <input type="range" id="volumeBar" value="80" min="0" max="100" />
+        </div>
+      </div>
+
+      <!-- Lyrics Container -->
+      <div class="lyrics-card">
+        <div class="lyrics-wrapper" id="lyricsContainer">
+          <p class="lyrics-placeholder">歌詞載入中...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Playlist Sidebar -->
+    <div class="playlist-sidebar" id="playlistSidebar">
+        <div class="playlist-header">
+            <h3>播放清單</h3>
+            <span class="material-icons-round" id="closePlaylistBtn">close</span>
+        </div>
+        <div class="playlist-content" id="playlistContent">
+            <!-- Items injected by JS -->
+        </div>
+    </div>
+
+    <!-- Audio Element -->
+    <audio id="audioPlayer" src=""></audio>
+
+    <script src="script.js"></script>
+  </body>
+</html>
