@@ -25,6 +25,7 @@ const songs = [
     {
         title: '平庸',
         artist: '薛之謙',
+        cover: 'cover/平庸.jpg',
         path: 'music/平庸_薛之謙.mp3',
         lrc: 'lrc/平庸_薛之謙.lrc'
     },
@@ -37,12 +38,14 @@ const songs = [
     {
         title: '頑疾',
         artist: '薛之謙',
+        cover: 'cover/頑疾.jpg',
         path: 'music/頑疾_薛之謙.mp3',
         lrc: 'lrc/頑疾_薛之謙.lrc'
     },
     {
         title: '友情提示',
         artist: '薛之謙',
+        cover: 'cover/友情提示.jpg',
         path: 'music/友情提示_薛之謙.mp3',
         lrc: 'lrc/友情提示_薛之謙.lrc'
     },
@@ -212,6 +215,13 @@ function loadSong(index) {
     
     // Dynamic Title
     document.title = `🎵 ${song.title} - ${song.artist}`;
+
+    // Update Cover Art
+    if (song.cover) {
+        coverArt.innerHTML = `<img src="${song.cover}" alt="${song.title}">`;
+    } else {
+        coverArt.innerHTML = '<span class="material-icons-round">music_note</span>';
+    }
     
     updatePlaylistActiveState();
     loadLyrics(song.lrc);
