@@ -17,6 +17,9 @@ const closePlaylistBtn = document.getElementById('closePlaylistBtn');
 const playlistSidebar = document.getElementById('playlistSidebar');
 const playlistContent = document.getElementById('playlistContent');
 
+const shuffleBtn = document.getElementById('shuffleBtn');
+const repeatBtn = document.getElementById('repeatBtn');
+
 // Songs Configuration (Playlist)
 const songs = [
     {
@@ -54,20 +57,27 @@ const songs = [
 let currentSongIndex = 0;
 let lyricsData = [];
 let isPlaying = false;
+let isShuffle = false;
+let repeatMode = 0; // 0: All, 1: One, 2: Off
 
 // Initialize
 function init() {
+    loadSettings();
     renderPlaylist();
     loadSong(currentSongIndex);
+    updatePlaybackControlsUI();
     
     // Event Listeners
     playBtn.addEventListener('click', () => togglePlay());
     prevBtn.addEventListener('click', prevSong);
-    nextBtn.addEventListener('click', nextSong);
+    nextBtn.addEventListener('click', () => nextSong(true));
     
+    shuffleBtn.addEventListener('click', toggleShuffle);
+    repeatBtn.addEventListener('click', toggleRepeat);
+
     // Playlist Toggle
     playlistBtn.addEventListener('click', () => {
-        playlistSidebar.classList.toggle('active'); // Toggle instead of add
+        playlistSidebar.classList.toggle('active');
     });
     closePlaylistBtn.addEventListener('click', () => {
         playlistSidebar.classList.remove('active');
@@ -79,9 +89,22 @@ function init() {
         progressBar.max = Math.floor(audioPlayer.duration);
     });
     
-    // Auto Next
+    // Auto Next / Repeat Logic
     audioPlayer.addEventListener('ended', () => {
-        nextSong();
+        if (repeatMode === 1) {
+            // Repeat One
+            audioPlayer.currentTime = 0;
+            audioPlayer.play();
+        } else if (repeatMode === 2) {
+            // Repeat Off: Stop unless it's not the last song (linear check only if not shuffle/random)
+             if (!isShuffle && currentSongIndex === songs.length - 1) {
+                 return;
+             }
+             nextSong(false);
+        } else {
+            // Repeat All (Default)
+            nextSong(false);
+        }
     });
 
     progressBar.addEventListener('input', () => {
@@ -91,33 +114,48 @@ function init() {
 
     volumeBar.addEventListener('input', (e) => {
         audioPlayer.volume = e.target.value / 100;
+        localStorage.setItem('volume', audioPlayer.volume);
     });
-
-    // Handle initial volume
-    audioPlayer.volume = volumeBar.value / 100;
 
     // Keyboard Shortcuts
     document.addEventListener('keydown', (e) => {
         if (e.code === 'Space') {
-            e.preventDefault(); // Prevent scrolling
+            e.preventDefault(); 
             togglePlay();
         } else if (e.code === 'ArrowRight') {
             audioPlayer.currentTime = Math.min(audioPlayer.currentTime + 5, audioPlayer.duration);
         } else if (e.code === 'ArrowLeft') {
             audioPlayer.currentTime = Math.max(audioPlayer.currentTime - 5, 0);
         } else if (e.code === 'ArrowUp') {
-            e.preventDefault(); // Prevent scrolling
+            e.preventDefault(); 
             const newVol = Math.min(audioPlayer.volume + 0.1, 1);
             audioPlayer.volume = newVol;
             volumeBar.value = newVol * 100;
+            localStorage.setItem('volume', newVol);
         } else if (e.code === 'ArrowDown') {
-            e.preventDefault(); // Prevent scrolling
+            e.preventDefault(); 
              const newVol = Math.max(audioPlayer.volume - 0.1, 0);
             audioPlayer.volume = newVol;
             volumeBar.value = newVol * 100;
+            localStorage.setItem('volume', newVol);
         }
     });
 }
+
+function loadSettings() {
+    const savedVol = localStorage.getItem('volume');
+    if (savedVol !== null) {
+        audioPlayer.volume = parseFloat(savedVol);
+        volumeBar.value = parseFloat(savedVol) * 100;
+    }
+    
+    const savedIndex = localStorage.getItem('lastSongIndex');
+    if (savedIndex !== null) {
+        currentSongIndex = parseInt(savedIndex);
+        if (currentSongIndex >= songs.length) currentSongIndex = 0;
+    }
+}
+
 
 // Render Playlist UI
 function renderPlaylist() {
@@ -165,6 +203,7 @@ function updatePlaylistActiveState() {
 // Load Song Info
 function loadSong(index) {
     currentSongIndex = index;
+    localStorage.setItem('lastSongIndex', currentSongIndex);
     const song = songs[index];
     
     audioPlayer.src = song.path;
@@ -188,23 +227,79 @@ function loadSong(index) {
     lyricsContainer.style.transform = 'translateY(0)';
 }
 
-function prevSong() {
-    currentSongIndex--;
-    if (currentSongIndex < 0) {
-        currentSongIndex = songs.length - 1;
+function nextSong(isManual = false) {
+    if (isShuffle) {
+        let newIndex;
+        do {
+            newIndex = Math.floor(Math.random() * songs.length);
+        } while (newIndex === currentSongIndex && songs.length > 1);
+        currentSongIndex = newIndex;
+    } else {
+        currentSongIndex++;
+        if (currentSongIndex > songs.length - 1) {
+            currentSongIndex = 0;
+        }
     }
     loadSong(currentSongIndex);
     togglePlay(true);
 }
 
-function nextSong() {
-    currentSongIndex++;
-    if (currentSongIndex > songs.length - 1) {
-        currentSongIndex = 0;
+function prevSong() {
+     if (isShuffle) {
+         let newIndex;
+        do {
+            newIndex = Math.floor(Math.random() * songs.length);
+        } while (newIndex === currentSongIndex && songs.length > 1);
+        currentSongIndex = newIndex;
+    } else {
+        currentSongIndex--;
+        if (currentSongIndex < 0) {
+            currentSongIndex = songs.length - 1;
+        }
     }
     loadSong(currentSongIndex);
     togglePlay(true);
 }
+
+function toggleShuffle() {
+    isShuffle = !isShuffle;
+    updatePlaybackControlsUI();
+}
+
+function toggleRepeat() {
+    repeatMode++;
+    if (repeatMode > 2) repeatMode = 0;
+    updatePlaybackControlsUI();
+}
+
+function updatePlaybackControlsUI() {
+    // Shuffle
+    if (isShuffle) {
+        shuffleBtn.classList.add('active');
+    } else {
+        shuffleBtn.classList.remove('active');
+    }
+
+    // Repeat (Icon change)
+    const icon = repeatBtn.querySelector('.material-icons-round');
+    if (repeatMode === 0) {
+        // Repeat All
+        repeatBtn.classList.add('active');
+        icon.textContent = 'repeat';
+        repeatBtn.title = '循環全部';
+    } else if (repeatMode === 1) {
+         // Repeat One
+        repeatBtn.classList.add('active');
+        icon.textContent = 'repeat_one';
+        repeatBtn.title = '單曲循環';
+    } else {
+        // Off
+        repeatBtn.classList.remove('active');
+        icon.textContent = 'repeat';
+        repeatBtn.title = '不循環';
+    }
+}
+
 
 // Load and Parse Lyrics
 async function loadLyrics(path) {
@@ -275,11 +370,11 @@ function togglePlay(forcePlay = null) {
     if (isPlaying) {
         audioPlayer.play().catch(e => console.error("Playback failed:", e)); // Handle auto-play policies
         coverArt.classList.add('playing');
-        document.title = `▶ ${songs[currentSongIndex].title} - ${songs[currentSongIndex].artist}`; 
+        document.title = `▶ ${songs[currentSongIndex].title} - ${songs[currentSongIndex].artist}`; // Add play icon
     } else {
         audioPlayer.pause();
         coverArt.classList.remove('playing');
-        document.title = `⏸ ${songs[currentSongIndex].title} - ${songs[currentSongIndex].artist}`; 
+        document.title = `⏸ ${songs[currentSongIndex].title} - ${songs[currentSongIndex].artist}`; // Add pause icon
     }
     updatePlayIcon();
 }
