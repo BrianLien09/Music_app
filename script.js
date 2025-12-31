@@ -43,13 +43,12 @@ const songs = [
         path: 'music/友情提示_薛之謙.mp3',
         lrc: 'lrc/友情提示_薛之謙.lrc'
     },
-    // Add more songs here manually
-    // {
-    //     title: 'Song 2',
-    //     artist: 'Artist 2',
-    //     path: 'song2.mp3',
-    //     lrc: 'song2.lrc'
-    // }
+    {
+        title: '這麼久沒見',
+        artist: '薛之謙',
+        path: 'music/這麼久沒見_薛之謙.mp3',
+        lrc: 'lrc/這麼久沒見_薛之謙.lrc'
+    },
 ];
 
 let currentSongIndex = 0;
@@ -96,6 +95,28 @@ function init() {
 
     // Handle initial volume
     audioPlayer.volume = volumeBar.value / 100;
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') {
+            e.preventDefault(); // Prevent scrolling
+            togglePlay();
+        } else if (e.code === 'ArrowRight') {
+            audioPlayer.currentTime = Math.min(audioPlayer.currentTime + 5, audioPlayer.duration);
+        } else if (e.code === 'ArrowLeft') {
+            audioPlayer.currentTime = Math.max(audioPlayer.currentTime - 5, 0);
+        } else if (e.code === 'ArrowUp') {
+            e.preventDefault(); // Prevent scrolling
+            const newVol = Math.min(audioPlayer.volume + 0.1, 1);
+            audioPlayer.volume = newVol;
+            volumeBar.value = newVol * 100;
+        } else if (e.code === 'ArrowDown') {
+            e.preventDefault(); // Prevent scrolling
+             const newVol = Math.max(audioPlayer.volume - 0.1, 0);
+            audioPlayer.volume = newVol;
+            volumeBar.value = newVol * 100;
+        }
+    });
 }
 
 // Render Playlist UI
