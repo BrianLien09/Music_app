@@ -171,6 +171,9 @@ function loadSong(index) {
     songTitle.textContent = song.title;
     artistName.textContent = song.artist;
     
+    // Dynamic Title
+    document.title = `🎵 ${song.title} - ${song.artist}`;
+    
     updatePlaylistActiveState();
     loadLyrics(song.lrc);
     
@@ -272,9 +275,11 @@ function togglePlay(forcePlay = null) {
     if (isPlaying) {
         audioPlayer.play().catch(e => console.error("Playback failed:", e)); // Handle auto-play policies
         coverArt.classList.add('playing');
+        document.title = `▶ ${songs[currentSongIndex].title} - ${songs[currentSongIndex].artist}`; 
     } else {
         audioPlayer.pause();
         coverArt.classList.remove('playing');
+        document.title = `⏸ ${songs[currentSongIndex].title} - ${songs[currentSongIndex].artist}`; 
     }
     updatePlayIcon();
 }
