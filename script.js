@@ -30,12 +30,6 @@ const songs = [
         lrc: 'lrc/平庸_薛之謙.lrc'
     },
     {
-        title: '放任',
-        artist: '汪六六',
-        path: 'music/汪六六_放任.mp3',
-        lrc: 'lrc/汪六六_放任.lrc'
-    },
-    {
         title: '頑疾',
         artist: '薛之謙',
         cover: 'cover/頑疾.jpg',
@@ -52,8 +46,23 @@ const songs = [
     {
         title: '這麼久沒見',
         artist: '薛之謙',
+        cover: 'cover/這麼久沒見.jpg',
         path: 'music/這麼久沒見_薛之謙.mp3',
         lrc: 'lrc/這麼久沒見_薛之謙.lrc'
+    },
+    {
+        title: '陪你去流浪',
+        artist: '薛之謙/錘娜麗莎',
+        cover: 'cover/陪你去流浪.jpg',
+        path: 'music/陪你去流浪_薛之謙&錘娜麗莎.mp3',
+        lrc: 'lrc/陪你去流浪_薛之謙&錘娜麗莎.lrc'
+    },
+    {
+        title: '憐憫',
+        artist: '張靚穎',
+        cover: 'cover/憐憫.jpg',
+        path: 'music/憐憫_張靚穎.mp3',
+        lrc: 'lrc/憐憫_張靚穎.lrc'
     },
 ];
 
