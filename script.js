@@ -64,6 +64,20 @@ const songs = [
         path: 'music/憐憫_張靚穎.mp3',
         lrc: 'lrc/憐憫_張靚穎.lrc'
     },
+    {
+        title: '最後一頁',
+        artist: '王赫野/姚曉棠',
+        cover: 'cover/最後一頁.jpg',
+        path: 'music/最後一頁_王赫野&姚曉棠.mp3',
+        lrc: 'lrc/最後一頁_王赫野&姚曉棠.lrc'
+    },
+    {
+        title: '字字句句',
+        artist: '王赫野&張碧晨',
+        cover: 'cover/字字句句.jpg',
+        path: 'music/字字句句_王赫野&張碧晨.mp3',
+        lrc: 'lrc/字字句句_王赫野&張碧晨.lrc'
+    },
 ];
 
 let currentSongIndex = 0;
