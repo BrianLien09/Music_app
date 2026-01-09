@@ -78,6 +78,13 @@ const songs = [
         path: 'music/字字句句_王赫野&張碧晨.mp3',
         lrc: 'lrc/字字句句_王赫野&張碧晨.lrc'
     },
+    {
+        title: '崇拜',
+        artist: '薛之謙',
+        cover: 'cover/崇拜.jpg',
+        path: 'music/崇拜_薛之謙.mp3',
+        lrc: 'lrc/崇拜_薛之謙.lrc'
+    },
 ];
 
 let currentSongIndex = 0;
