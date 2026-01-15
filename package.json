@@ -1,0 +1,22 @@
+{
+  "name": "glass-music-player",
+  "version": "2.0.0",
+  "description": "現代化玻璃擬態音樂播放器",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "music-player",
+    "glassmorphism",
+    "lyrics",
+    "audio"
+  ],
+  "author": "BrianLien09",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

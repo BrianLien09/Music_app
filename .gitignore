@@ -1,0 +1,29 @@
+# 依賴套件
+node_modules/
+
+# Vite 建置輸出
+dist/
+dist-ssr/
+
+# 編輯器
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# 系統檔案
+.DS_Store
+Thumbs.db
+
+# 暫存檔案
+*.log
+*.local
+
+# 環境變數
+.env
+.env.local
+.env.*.local
