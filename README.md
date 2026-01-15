@@ -144,7 +144,44 @@ npm run build
 
 由于瀏覽器的安全性限制 (CORS)，直接雙擊 `index.html` 開啟可能會導致**歌詞無法載入**。
 
-### 方法一：上傳至 GitHub Pages (推薦 ⭐)
+### 方法一：GitHub Pages 自動部署 (推薦 ⭐⭐⭐)
+
+**一次設定，永久自動！每次 push 就自動部署上線！**
+
+#### 設定步驟（只需 5 分鐘）
+
+1. **推送程式碼到 GitHub**
+
+   ```bash
+   git add .
+   git commit -m "feat: 初始提交"
+   git push origin main
+   ```
+
+2. **啟用 GitHub Pages**
+
+   - 進入 Repository → Settings → Pages
+   - Source 選擇 **GitHub Actions**
+   - 儲存
+
+3. **等待自動部署完成**
+
+   - 進入 Actions 分頁
+   - 等待綠色勾勾 ✅（約 2-3 分鐘）
+
+4. **取得網址**
+   ```
+   https://你的帳號.github.io/music_app/
+   ```
+
+**之後每次 push 都會自動部署！** 🎉
+
+📖 詳細設定：查看 [GITHUB_PAGES_SETUP.md](GITHUB_PAGES_SETUP.md)  
+⚡ 快速指令：使用 `/github-pages-deploy` workflow
+
+---
+
+### 方法二：手動上傳至 GitHub Pages
 
 這將會產生一個公開的網址，可以分享給朋友使用。
 

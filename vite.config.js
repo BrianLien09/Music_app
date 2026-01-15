@@ -47,7 +47,11 @@ export default defineConfig({
   },
 
   // 公共基礎路徑
-  base: './',
+  // 開發時使用 './'，部署到 GitHub Pages 時使用 '/Repository名稱/'
+  // GitHub Actions 會自動設定 GITHUB_REPOSITORY 環境變數
+  base: process.env.GITHUB_ACTIONS 
+    ? `/${process.env.GITHUB_REPOSITORY?.split('/')[1] || 'music_app'}/`
+    : './',
 
   // 靜態資源處理
   assetsInclude: ['**/*.lrc'], // 確保 .lrc 檔案被視為資源
