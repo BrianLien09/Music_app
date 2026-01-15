@@ -48,65 +48,65 @@ const songs = [
   {
     title: '平庸',
     artist: '薛之謙',
-    cover: 'cover/平庸.jpg',
-    path: 'music/平庸_薛之謙.mp3',
-    lrc: 'lrc/平庸_薛之謙.lrc'
+    cover: '/cover/平庸.jpg',
+    path: '/music/平庸_薛之謙.mp3',
+    lrc: '/lrc/平庸_薛之謙.lrc'
   },
   {
     title: '頑疾',
     artist: '薛之謙',
-    cover: 'cover/頑疾.jpg',
-    path: 'music/頑疾_薛之謙.mp3',
-    lrc: 'lrc/頑疾_薛之謙.lrc'
+    cover: '/cover/頑疾.jpg',
+    path: '/music/頑疾_薛之謙.mp3',
+    lrc: '/lrc/頑疾_薛之謙.lrc'
   },
   {
     title: '友情提示',
     artist: '薛之謙',
-    cover: 'cover/友情提示.jpg',
-    path: 'music/友情提示_薛之謙.mp3',
-    lrc: 'lrc/友情提示_薛之謙.lrc'
+    cover: '/cover/友情提示.jpg',
+    path: '/music/友情提示_薛之謙.mp3',
+    lrc: '/lrc/友情提示_薛之謙.lrc'
   },
   {
     title: '這麼久沒見',
     artist: '薛之謙',
-    cover: 'cover/這麼久沒見.jpg',
-    path: 'music/這麼久沒見_薛之謙.mp3',
-    lrc: 'lrc/這麼久沒見_薛之謙.lrc'
+    cover: '/cover/這麼久沒見.jpg',
+    path: '/music/這麼久沒見_薛之謙.mp3',
+    lrc: '/lrc/這麼久沒見_薛之謙.lrc'
   },
   {
     title: '陪你去流浪',
     artist: '薛之謙/錘娜麗莎',
-    cover: 'cover/陪你去流浪.jpg',
-    path: 'music/陪你去流浪_薛之謙&錘娜麗莎.mp3',
-    lrc: 'lrc/陪你去流浪_薛之謙&錘娜麗莎.lrc'
+    cover: '/cover/陪你去流浪.jpg',
+    path: '/music/陪你去流浪_薛之謙&錘娜麗莎.mp3',
+    lrc: '/lrc/陪你去流浪_薛之謙&錘娜麗莎.lrc'
   },
   {
     title: '憐憫',
     artist: '張靚穎',
-    cover: 'cover/憐憫.jpg',
-    path: 'music/憐憫_張靚穎.mp3',
-    lrc: 'lrc/憐憫_張靚穎.lrc'
+    cover: '/cover/憐憫.jpg',
+    path: '/music/憐憫_張靚穎.mp3',
+    lrc: '/lrc/憐憫_張靚穎.lrc'
   },
   {
     title: '最後一頁',
     artist: '王赫野/姚曉棠',
-    cover: 'cover/最後一頁.jpg',
-    path: 'music/最後一頁_王赫野&姚曉棠.mp3',
-    lrc: 'lrc/最後一頁_王赫野&姚曉棠.lrc'
+    cover: '/cover/最後一頁.jpg',
+    path: '/music/最後一頁_王赫野&姚曉棠.mp3',
+    lrc: '/lrc/最後一頁_王赫野&姚曉棠.lrc'
   },
   {
     title: '字字句句',
     artist: '王赫野&張碧晨',
-    cover: 'cover/字字句句.jpg',
-    path: 'music/字字句句_王赫野&張碧晨.mp3',
-    lrc: 'lrc/字字句句_王赫野&張碧晨.lrc'
+    cover: '/cover/字字句句.jpg',
+    path: '/music/字字句句_王赫野&張碧晨.mp3',
+    lrc: '/lrc/字字句句_王赫野&張碧晨.lrc'
   },
   {
     title: '崇拜',
     artist: '薛之謙',
-    cover: 'cover/崇拜.jpg',
-    path: 'music/崇拜_薛之謙.mp3',
-    lrc: 'lrc/崇拜_薛之謙.lrc'
+    cover: '/cover/崇拜.jpg',
+    path: '/music/崇拜_薛之謙.mp3',
+    lrc: '/lrc/崇拜_薛之謙.lrc'
   }
 ];
 
