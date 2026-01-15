@@ -1,486 +1,695 @@
-const audioPlayer = document.getElementById('audioPlayer');
-const playBtn = document.getElementById('playBtn');
-const playIcon = document.getElementById('playIcon');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
-const progressBar = document.getElementById('progressBar');
-const volumeBar = document.getElementById('volumeBar');
-const currentTimeEl = document.getElementById('currentTime');
-const durationEl = document.getElementById('duration');
-const lyricsContainer = document.getElementById('lyricsContainer');
-const coverArt = document.getElementById('coverArt');
-const songTitle = document.getElementById('songTitle');
-const artistName = document.getElementById('artistName');
+// ============================================
+// DOM 元素快取 (Cache DOM Elements)
+// ============================================
+const DOM = {
+  audio: document.getElementById('audioPlayer'),
+  playBtn: document.getElementById('playBtn'),
+  playIcon: document.getElementById('playIcon'),
+  prevBtn: document.getElementById('prevBtn'),
+  nextBtn: document.getElementById('nextBtn'),
+  progressBar: document.getElementById('progressBar'),
+  volumeBar: document.getElementById('volumeBar'),
+  currentTime: document.getElementById('currentTime'),
+  duration: document.getElementById('duration'),
+  lyricsContainer: document.getElementById('lyricsContainer'),
+  coverArt: document.getElementById('coverArt'),
+  songTitle: document.getElementById('songTitle'),
+  artistName: document.getElementById('artistName'),
+  playlistBtn: document.getElementById('playlistBtn'),
+  closePlaylistBtn: document.getElementById('closePlaylistBtn'),
+  playlistSidebar: document.getElementById('playlistSidebar'),
+  playlistContent: document.getElementById('playlistContent'),
+  shuffleBtn: document.getElementById('shuffleBtn'),
+  repeatBtn: document.getElementById('repeatBtn')
+};
 
-const playlistBtn = document.getElementById('playlistBtn');
-const closePlaylistBtn = document.getElementById('closePlaylistBtn');
-const playlistSidebar = document.getElementById('playlistSidebar');
-const playlistContent = document.getElementById('playlistContent');
+// ============================================
+// 常數定義 (Constants)
+// ============================================
+const CONSTANTS = {
+  STORAGE_KEYS: {
+    VOLUME: 'volume',
+    LAST_SONG_INDEX: 'lastSongIndex'
+  },
+  REPEAT_MODES: {
+    ALL: 0,
+    ONE: 1,
+    OFF: 2
+  },
+  SEEK_TIME: 5, // 快轉/倒轉秒數
+  VOLUME_STEP: 0.1, // 音量調整步進
+  DEFAULT_VOLUME: 0.8 // 預設音量
+};
 
-const shuffleBtn = document.getElementById('shuffleBtn');
-const repeatBtn = document.getElementById('repeatBtn');
-
-// Songs Configuration (Playlist)
+// ============================================
+// 播放清單資料 (Songs Configuration)
+// ============================================
 const songs = [
-    {
-        title: '平庸',
-        artist: '薛之謙',
-        cover: 'cover/平庸.jpg',
-        path: 'music/平庸_薛之謙.mp3',
-        lrc: 'lrc/平庸_薛之謙.lrc'
-    },
-    {
-        title: '頑疾',
-        artist: '薛之謙',
-        cover: 'cover/頑疾.jpg',
-        path: 'music/頑疾_薛之謙.mp3',
-        lrc: 'lrc/頑疾_薛之謙.lrc'
-    },
-    {
-        title: '友情提示',
-        artist: '薛之謙',
-        cover: 'cover/友情提示.jpg',
-        path: 'music/友情提示_薛之謙.mp3',
-        lrc: 'lrc/友情提示_薛之謙.lrc'
-    },
-    {
-        title: '這麼久沒見',
-        artist: '薛之謙',
-        cover: 'cover/這麼久沒見.jpg',
-        path: 'music/這麼久沒見_薛之謙.mp3',
-        lrc: 'lrc/這麼久沒見_薛之謙.lrc'
-    },
-    {
-        title: '陪你去流浪',
-        artist: '薛之謙/錘娜麗莎',
-        cover: 'cover/陪你去流浪.jpg',
-        path: 'music/陪你去流浪_薛之謙&錘娜麗莎.mp3',
-        lrc: 'lrc/陪你去流浪_薛之謙&錘娜麗莎.lrc'
-    },
-    {
-        title: '憐憫',
-        artist: '張靚穎',
-        cover: 'cover/憐憫.jpg',
-        path: 'music/憐憫_張靚穎.mp3',
-        lrc: 'lrc/憐憫_張靚穎.lrc'
-    },
-    {
-        title: '最後一頁',
-        artist: '王赫野/姚曉棠',
-        cover: 'cover/最後一頁.jpg',
-        path: 'music/最後一頁_王赫野&姚曉棠.mp3',
-        lrc: 'lrc/最後一頁_王赫野&姚曉棠.lrc'
-    },
-    {
-        title: '字字句句',
-        artist: '王赫野&張碧晨',
-        cover: 'cover/字字句句.jpg',
-        path: 'music/字字句句_王赫野&張碧晨.mp3',
-        lrc: 'lrc/字字句句_王赫野&張碧晨.lrc'
-    },
-    {
-        title: '崇拜',
-        artist: '薛之謙',
-        cover: 'cover/崇拜.jpg',
-        path: 'music/崇拜_薛之謙.mp3',
-        lrc: 'lrc/崇拜_薛之謙.lrc'
-    },
+  {
+    title: '平庸',
+    artist: '薛之謙',
+    cover: 'cover/平庸.jpg',
+    path: 'music/平庸_薛之謙.mp3',
+    lrc: 'lrc/平庸_薛之謙.lrc'
+  },
+  {
+    title: '頑疾',
+    artist: '薛之謙',
+    cover: 'cover/頑疾.jpg',
+    path: 'music/頑疾_薛之謙.mp3',
+    lrc: 'lrc/頑疾_薛之謙.lrc'
+  },
+  {
+    title: '友情提示',
+    artist: '薛之謙',
+    cover: 'cover/友情提示.jpg',
+    path: 'music/友情提示_薛之謙.mp3',
+    lrc: 'lrc/友情提示_薛之謙.lrc'
+  },
+  {
+    title: '這麼久沒見',
+    artist: '薛之謙',
+    cover: 'cover/這麼久沒見.jpg',
+    path: 'music/這麼久沒見_薛之謙.mp3',
+    lrc: 'lrc/這麼久沒見_薛之謙.lrc'
+  },
+  {
+    title: '陪你去流浪',
+    artist: '薛之謙/錘娜麗莎',
+    cover: 'cover/陪你去流浪.jpg',
+    path: 'music/陪你去流浪_薛之謙&錘娜麗莎.mp3',
+    lrc: 'lrc/陪你去流浪_薛之謙&錘娜麗莎.lrc'
+  },
+  {
+    title: '憐憫',
+    artist: '張靚穎',
+    cover: 'cover/憐憫.jpg',
+    path: 'music/憐憫_張靚穎.mp3',
+    lrc: 'lrc/憐憫_張靚穎.lrc'
+  },
+  {
+    title: '最後一頁',
+    artist: '王赫野/姚曉棠',
+    cover: 'cover/最後一頁.jpg',
+    path: 'music/最後一頁_王赫野&姚曉棠.mp3',
+    lrc: 'lrc/最後一頁_王赫野&姚曉棠.lrc'
+  },
+  {
+    title: '字字句句',
+    artist: '王赫野&張碧晨',
+    cover: 'cover/字字句句.jpg',
+    path: 'music/字字句句_王赫野&張碧晨.mp3',
+    lrc: 'lrc/字字句句_王赫野&張碧晨.lrc'
+  },
+  {
+    title: '崇拜',
+    artist: '薛之謙',
+    cover: 'cover/崇拜.jpg',
+    path: 'music/崇拜_薛之謙.mp3',
+    lrc: 'lrc/崇拜_薛之謙.lrc'
+  }
 ];
 
-let currentSongIndex = 0;
-let lyricsData = [];
-let isPlaying = false;
-let isShuffle = false;
-let repeatMode = 0; // 0: All, 1: One, 2: Off
+// ============================================
+// 應用狀態 (Application State)
+// ============================================
+const state = {
+  currentSongIndex: 0,
+  lyricsData: [],
+  isPlaying: false,
+  isShuffle: false,
+  repeatMode: CONSTANTS.REPEAT_MODES.ALL,
+  lastActiveLyricsIndex: -1 // 用來追蹤上次活動的歌詞行，避免不必要的重繪
+};
 
-// Initialize
-function init() {
-    loadSettings();
-    renderPlaylist();
-    loadSong(currentSongIndex);
-    updatePlaybackControlsUI();
-    
-    // Event Listeners
-    playBtn.addEventListener('click', () => togglePlay());
-    prevBtn.addEventListener('click', prevSong);
-    nextBtn.addEventListener('click', () => nextSong(true));
-    
-    shuffleBtn.addEventListener('click', toggleShuffle);
-    repeatBtn.addEventListener('click', toggleRepeat);
-
-    // Playlist Toggle
-    playlistBtn.addEventListener('click', () => {
-        playlistSidebar.classList.toggle('active');
-    });
-    closePlaylistBtn.addEventListener('click', () => {
-        playlistSidebar.classList.remove('active');
-    });
-
-    audioPlayer.addEventListener('timeupdate', updateProgress);
-    audioPlayer.addEventListener('loadedmetadata', () => {
-        durationEl.textContent = formatTime(audioPlayer.duration);
-        progressBar.max = Math.floor(audioPlayer.duration);
-    });
-    
-    // Auto Next / Repeat Logic
-    audioPlayer.addEventListener('ended', () => {
-        if (repeatMode === 1) {
-            // Repeat One
-            audioPlayer.currentTime = 0;
-            audioPlayer.play();
-        } else if (repeatMode === 2) {
-            // Repeat Off: Stop unless it's not the last song (linear check only if not shuffle/random)
-             if (!isShuffle && currentSongIndex === songs.length - 1) {
-                 return;
-             }
-             nextSong(false);
-        } else {
-            // Repeat All (Default)
-            nextSong(false);
-        }
-    });
-
-    progressBar.addEventListener('input', () => {
-        audioPlayer.currentTime = progressBar.value;
-        syncLyrics();
-    });
-
-    volumeBar.addEventListener('input', (e) => {
-        audioPlayer.volume = e.target.value / 100;
-        localStorage.setItem('volume', audioPlayer.volume);
-    });
-
-    // Keyboard Shortcuts
-    document.addEventListener('keydown', (e) => {
-        if (e.code === 'Space') {
-            e.preventDefault(); 
-            togglePlay();
-        } else if (e.code === 'ArrowRight') {
-            audioPlayer.currentTime = Math.min(audioPlayer.currentTime + 5, audioPlayer.duration);
-        } else if (e.code === 'ArrowLeft') {
-            audioPlayer.currentTime = Math.max(audioPlayer.currentTime - 5, 0);
-        } else if (e.code === 'ArrowUp') {
-            e.preventDefault(); 
-            const newVol = Math.min(audioPlayer.volume + 0.1, 1);
-            audioPlayer.volume = newVol;
-            volumeBar.value = newVol * 100;
-            localStorage.setItem('volume', newVol);
-        } else if (e.code === 'ArrowDown') {
-            e.preventDefault(); 
-             const newVol = Math.max(audioPlayer.volume - 0.1, 0);
-            audioPlayer.volume = newVol;
-            volumeBar.value = newVol * 100;
-            localStorage.setItem('volume', newVol);
-        }
-    });
-}
-
-function loadSettings() {
-    const savedVol = localStorage.getItem('volume');
-    if (savedVol !== null) {
-        audioPlayer.volume = parseFloat(savedVol);
-        volumeBar.value = parseFloat(savedVol) * 100;
-    }
-    
-    const savedIndex = localStorage.getItem('lastSongIndex');
-    if (savedIndex !== null) {
-        currentSongIndex = parseInt(savedIndex);
-        if (currentSongIndex >= songs.length) currentSongIndex = 0;
-    }
-}
-
-
-// Render Playlist UI
-function renderPlaylist() {
-    playlistContent.innerHTML = '';
-    songs.forEach((song, index) => {
-        const item = document.createElement('div');
-        item.classList.add('playlist-item');
-        if (index === currentSongIndex) item.classList.add('active-song');
-        
-        item.innerHTML = `
-            <div class="song-index">${index + 1}</div>
-            <div class="playlist-item-info">
-                <span class="playlist-item-title">${song.title}</span>
-                <span class="playlist-item-artist">${song.artist}</span>
-            </div>
-            <div class="playing-indicator">
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-            </div>
-        `;
-
-        item.addEventListener('click', () => {
-            if (currentSongIndex !== index) {
-                loadSong(index);
-                togglePlay(true);
-            }
-        });
-
-        playlistContent.appendChild(item);
-    });
-}
-
-function updatePlaylistActiveState() {
-    const items = document.querySelectorAll('.playlist-item');
-    items.forEach((item, index) => {
-        if (index === currentSongIndex) {
-            item.classList.add('active-song');
-        } else {
-            item.classList.remove('active-song');
-        }
-    });
-}
-
-// Load Song Info
-function loadSong(index) {
-    currentSongIndex = index;
-    localStorage.setItem('lastSongIndex', currentSongIndex);
-    const song = songs[index];
-    
-    audioPlayer.src = song.path;
-    songTitle.textContent = song.title;
-    artistName.textContent = song.artist;
-    
-    // Dynamic Title
-    document.title = `🎵 ${song.title} - ${song.artist}`;
-
-    // Update Cover Art
-    if (song.cover) {
-        coverArt.innerHTML = `<img src="${song.cover}" alt="${song.title}">`;
-    } else {
-        coverArt.innerHTML = '<span class="material-icons-round">music_note</span>';
-    }
-    
-    updatePlaylistActiveState();
-    loadLyrics(song.lrc);
-    
-    // Reset state
-    coverArt.classList.remove('playing');
-    progressBar.value = 0;
-    currentTimeEl.textContent = '0:00';
-    isPlaying = false;
-    updatePlayIcon();
-    
-    // Reset Lyrics Position
-    lyricsContainer.style.transform = 'translateY(0)';
-}
-
-function nextSong(isManual = false) {
-    if (isShuffle) {
-        let newIndex;
-        do {
-            newIndex = Math.floor(Math.random() * songs.length);
-        } while (newIndex === currentSongIndex && songs.length > 1);
-        currentSongIndex = newIndex;
-    } else {
-        currentSongIndex++;
-        if (currentSongIndex > songs.length - 1) {
-            currentSongIndex = 0;
-        }
-    }
-    loadSong(currentSongIndex);
-    togglePlay(true);
-}
-
-function prevSong() {
-     if (isShuffle) {
-         let newIndex;
-        do {
-            newIndex = Math.floor(Math.random() * songs.length);
-        } while (newIndex === currentSongIndex && songs.length > 1);
-        currentSongIndex = newIndex;
-    } else {
-        currentSongIndex--;
-        if (currentSongIndex < 0) {
-            currentSongIndex = songs.length - 1;
-        }
-    }
-    loadSong(currentSongIndex);
-    togglePlay(true);
-}
-
-function toggleShuffle() {
-    isShuffle = !isShuffle;
-    updatePlaybackControlsUI();
-}
-
-function toggleRepeat() {
-    repeatMode++;
-    if (repeatMode > 2) repeatMode = 0;
-    updatePlaybackControlsUI();
-}
-
-function updatePlaybackControlsUI() {
-    // Shuffle
-    if (isShuffle) {
-        shuffleBtn.classList.add('active');
-    } else {
-        shuffleBtn.classList.remove('active');
-    }
-
-    // Repeat (Icon change)
-    const icon = repeatBtn.querySelector('.material-icons-round');
-    if (repeatMode === 0) {
-        // Repeat All
-        repeatBtn.classList.add('active');
-        icon.textContent = 'repeat';
-        repeatBtn.title = '循環全部';
-    } else if (repeatMode === 1) {
-         // Repeat One
-        repeatBtn.classList.add('active');
-        icon.textContent = 'repeat_one';
-        repeatBtn.title = '單曲循環';
-    } else {
-        // Off
-        repeatBtn.classList.remove('active');
-        icon.textContent = 'repeat';
-        repeatBtn.title = '不循環';
-    }
-}
-
-
-// Load and Parse Lyrics
-async function loadLyrics(path) {
-    lyricsContainer.innerHTML = '<p class="lyrics-placeholder">歌詞載入中...</p>';
-    lyricsContainer.style.transform = 'translateY(0)'; // Reset
-    lyricsData = [];
-    
-    try {
-        const response = await fetch(path);
-        if (!response.ok) throw new Error('Lyrics not found');
-        const lrcText = await response.text();
-        parseLyrics(lrcText);
-    } catch (error) {
-        lyricsContainer.innerHTML = '<p class="lyrics-placeholder">無法載入歌詞</p>';
-        console.error(error);
-    }
-}
-
-function parseLyrics(lrc) {
-    const lines = lrc.split('\n');
-    const timeRegex = /\[(\d{2}):(\d{2})\.(\d{2,3})\]/;
-
-    lyricsData = lines.map(line => {
-        const match = timeRegex.exec(line);
-        if (match) {
-            const minutes = parseInt(match[1]);
-            const seconds = parseInt(match[2]);
-            const milliseconds = parseInt(match[3]);
-            const time = minutes * 60 + seconds + milliseconds / 1000;
-            const text = line.replace(timeRegex, '').trim();
-            return { time, text };
-        }
-        return null; // Skip non-lyric lines
-    }).filter(item => item !== null && item.text !== '');
-
-    renderLyrics();
-}
-
-function renderLyrics() {
-    lyricsContainer.innerHTML = '';
-    lyricsData.forEach((line, index) => {
-        const p = document.createElement('p');
-        p.classList.add('lyrics-line');
-        p.textContent = line.text;
-        p.dataset.index = index;
-        p.dataset.time = line.time;
-        
-        // Click line to seek
-        p.addEventListener('click', () => {
-            audioPlayer.currentTime = line.time;
-            togglePlay(true); // Ensure playing
-        });
-        
-        lyricsContainer.appendChild(p);
-    });
-}
-
-// Playback Controls
-function togglePlay(forcePlay = null) {
-    if (forcePlay === true) {
-        isPlaying = true;
-    } else if (forcePlay === false) {
-        isPlaying = false;
-    } else {
-        isPlaying = !isPlaying;
-    }
-
-    if (isPlaying) {
-        audioPlayer.play().catch(e => console.error("Playback failed:", e)); // Handle auto-play policies
-        coverArt.classList.add('playing');
-        document.title = `▶ ${songs[currentSongIndex].title} - ${songs[currentSongIndex].artist}`; // Add play icon
-    } else {
-        audioPlayer.pause();
-        coverArt.classList.remove('playing');
-        document.title = `⏸ ${songs[currentSongIndex].title} - ${songs[currentSongIndex].artist}`; // Add pause icon
-    }
-    updatePlayIcon();
-}
-
-function updatePlayIcon() {
-    playIcon.textContent = isPlaying ? 'pause' : 'play_arrow';
-}
-
-// Progress & Sync Logic
-function updateProgress() {
-    const current = audioPlayer.currentTime;
-    progressBar.value = current;
-    currentTimeEl.textContent = formatTime(current);
-    syncLyrics(current);
-}
-
-function syncLyrics(currentTime = audioPlayer.currentTime) {
-    // Find active lyric line
-    let activeIndex = -1;
-    for (let i = 0; i < lyricsData.length; i++) {
-        if (lyricsData[i].time <= currentTime) {
-            activeIndex = i;
-        } else {
-            break;
-        }
-    }
-
-    // Update UI
-    const allLines = document.querySelectorAll('.lyrics-line');
-    
-    // Don't redraw if active line hasn't changed to avoid jitter, 
-    // BUT we need to ensure styling is correct if we switched songs
-    // Simple check: see if current active class is on the right index
-    const currentActive = document.querySelector('.lyrics-line.active');
-    const currentActiveIndex = currentActive ? parseInt(currentActive.dataset.index) : -1;
-
-    if (activeIndex !== currentActiveIndex) {
-        allLines.forEach(line => line.classList.remove('active'));
-        
-        if (activeIndex !== -1 && activeIndex < allLines.length) {
-            const activeLine = allLines[activeIndex];
-            activeLine.classList.add('active');
-            
-            // New Transform Logic
-            // We want the active line to be in the center of the lyrics-card
-            // lyrics-wrapper starts at top: 50% (css).
-            // So translateY should be - (line.offsetTop + line.height/2)
-            
-            const lineTop = activeLine.offsetTop;
-            const lineHeight = activeLine.clientHeight;
-            
-            // Because wrapper is top: 50%, a translateY of -(lineTop + lineHeight/2) 
-            // moves that point to the vertical center of the screen.
-            const offset = -(lineTop + lineHeight / 2);
-            
-            lyricsContainer.style.transform = `translateY(${offset}px)`;
-        }
-    }
-}
-
-function formatTime(seconds) {
+// ============================================
+// 工具函式 (Utility Functions)
+// ============================================
+const Utils = {
+  /**
+   * 格式化秒數為 mm:ss 格式
+   */
+  formatTime(seconds) {
     if (isNaN(seconds)) return "0:00";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  },
+
+  /**
+   * 解析 LRC 歌詞格式
+   */
+  parseLyrics(lrcText) {
+    const lines = lrcText.split('\n');
+    const timeRegex = /\[(\d{2}):(\d{2})\.(\d{2,3})\]/;
+
+    return lines
+      .map(line => {
+        const match = timeRegex.exec(line);
+        if (!match) return null;
+
+        const minutes = parseInt(match[1], 10);
+        const seconds = parseInt(match[2], 10);
+        const milliseconds = parseInt(match[3], 10);
+        const time = minutes * 60 + seconds + milliseconds / 1000;
+        const text = line.replace(timeRegex, '').trim();
+
+        return text ? { time, text } : null;
+      })
+      .filter(item => item !== null);
+  },
+
+  /**
+   * 取得隨機索引（不重複當前索引）
+   */
+  getRandomIndex(currentIndex, arrayLength) {
+    if (arrayLength <= 1) return 0;
+    
+    let newIndex;
+    do {
+      newIndex = Math.floor(Math.random() * arrayLength);
+    } while (newIndex === currentIndex);
+    
+    return newIndex;
+  },
+
+  /**
+   * 安全的 clamp 函式
+   */
+  clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
+};
+
+// ============================================
+// 本地存儲管理 (Local Storage Manager)
+// ============================================
+const Storage = {
+  /**
+   * 載入使用者設定
+   */
+  loadSettings() {
+    // 載入音量
+    const savedVolume = localStorage.getItem(CONSTANTS.STORAGE_KEYS.VOLUME);
+    if (savedVolume !== null) {
+      const volume = parseFloat(savedVolume);
+      DOM.audio.volume = volume;
+      DOM.volumeBar.value = volume * 100;
+    } else {
+      DOM.audio.volume = CONSTANTS.DEFAULT_VOLUME;
+      DOM.volumeBar.value = CONSTANTS.DEFAULT_VOLUME * 100;
+    }
+    
+    // 載入上次播放的歌曲索引
+    const savedIndex = localStorage.getItem(CONSTANTS.STORAGE_KEYS.LAST_SONG_INDEX);
+    if (savedIndex !== null) {
+      const index = parseInt(savedIndex, 10);
+      state.currentSongIndex = Utils.clamp(index, 0, songs.length - 1);
+    }
+  },
+
+  /**
+   * 儲存音量設定
+   */
+  saveVolume(volume) {
+    localStorage.setItem(CONSTANTS.STORAGE_KEYS.VOLUME, volume);
+  },
+
+  /**
+   * 儲存歌曲索引
+   */
+  saveSongIndex(index) {
+    localStorage.setItem(CONSTANTS.STORAGE_KEYS.LAST_SONG_INDEX, index);
+  }
+};
+
+// ============================================
+// UI 更新相關 (UI Updates)
+// ============================================
+const UI = {
+  /**
+   * 更新播放/暫停圖示
+   */
+  updatePlayIcon() {
+    DOM.playIcon.textContent = state.isPlaying ? 'pause' : 'play_arrow';
+  },
+
+  /**
+   * 更新專輯封面
+   */
+  updateCoverArt(song) {
+    if (song.cover) {
+      DOM.coverArt.innerHTML = `<img src="${song.cover}" alt="${song.title}">`;
+    } else {
+      DOM.coverArt.innerHTML = '<span class="material-icons-round">music_note</span>';
+    }
+  },
+
+  /**
+   * 更新歌曲資訊顯示
+   */
+  updateSongInfo(song) {
+    DOM.songTitle.textContent = song.title;
+    DOM.artistName.textContent = song.artist;
+    document.title = `🎵 ${song.title} - ${song.artist}`;
+  },
+
+  /**
+   * 更新播放控制按鈕狀態（隨機/循環）
+   */
+  updatePlaybackControls() {
+    // 隨機播放按鈕
+    DOM.shuffleBtn.classList.toggle('active', state.isShuffle);
+
+    // 循環模式按鈕
+    const icon = DOM.repeatBtn.querySelector('.material-icons-round');
+    DOM.repeatBtn.classList.toggle('active', state.repeatMode !== CONSTANTS.REPEAT_MODES.OFF);
+
+    switch (state.repeatMode) {
+      case CONSTANTS.REPEAT_MODES.ALL:
+        icon.textContent = 'repeat';
+        DOM.repeatBtn.title = '循環全部';
+        break;
+      case CONSTANTS.REPEAT_MODES.ONE:
+        icon.textContent = 'repeat_one';
+        DOM.repeatBtn.title = '單曲循環';
+        break;
+      case CONSTANTS.REPEAT_MODES.OFF:
+        icon.textContent = 'repeat';
+        DOM.repeatBtn.title = '不循環';
+        break;
+    }
+  },
+
+  /**
+   * 更新播放列表中的活動狀態
+   */
+  updatePlaylistActiveState() {
+    const items = document.querySelectorAll('.playlist-item');
+    items.forEach((item, index) => {
+      item.classList.toggle('active-song', index === state.currentSongIndex);
+    });
+  },
+
+  /**
+   * 渲染播放列表
+   */
+  renderPlaylist() {
+    DOM.playlistContent.innerHTML = songs
+      .map((song, index) => `
+        <div class="playlist-item ${index === state.currentSongIndex ? 'active-song' : ''}" data-index="${index}">
+          <div class="song-index">${index + 1}</div>
+          <div class="playlist-item-info">
+            <span class="playlist-item-title">${song.title}</span>
+            <span class="playlist-item-artist">${song.artist}</span>
+          </div>
+          <div class="playing-indicator">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+          </div>
+        </div>
+      `)
+      .join('');
+
+    // 使用事件委派綁定點擊事件
+    DOM.playlistContent.addEventListener('click', (e) => {
+      const item = e.target.closest('.playlist-item');
+      if (!item) return;
+
+      const index = parseInt(item.dataset.index, 10);
+      if (state.currentSongIndex !== index) {
+        Player.loadSong(index);
+        Player.togglePlay(true);
+      }
+    });
+  },
+
+  /**
+   * 顯示歌詞載入中
+   */
+  showLyricsLoading() {
+    DOM.lyricsContainer.innerHTML = '<p class="lyrics-placeholder">歌詞載入中...</p>';
+    DOM.lyricsContainer.style.transform = 'translateY(0)';
+  },
+
+  /**
+   * 顯示歌詞載入失敗
+   */
+  showLyricsError() {
+    DOM.lyricsContainer.innerHTML = '<p class="lyrics-placeholder">無法載入歌詞</p>';
+  },
+
+  /**
+   * 渲染歌詞內容
+   */
+  renderLyrics(lyricsData) {
+    DOM.lyricsContainer.innerHTML = lyricsData
+      .map((line, index) => `
+        <p class="lyrics-line" data-index="${index}" data-time="${line.time}">
+          ${line.text}
+        </p>
+      `)
+      .join('');
+
+    // 使用事件委派綁定歌詞點擊事件
+    DOM.lyricsContainer.addEventListener('click', (e) => {
+      const line = e.target.closest('.lyrics-line');
+      if (!line) return;
+
+      const time = parseFloat(line.dataset.time);
+      DOM.audio.currentTime = time;
+      Player.togglePlay(true);
+    });
+  }
+};
+
+// ============================================
+// 歌詞管理 (Lyrics Manager)
+// ============================================
+const Lyrics = {
+  /**
+   * 載入並解析歌詞檔案
+   */
+  async load(lrcPath) {
+    UI.showLyricsLoading();
+    state.lyricsData = [];
+    state.lastActiveLyricsIndex = -1;
+    
+    try {
+      const response = await fetch(lrcPath);
+      if (!response.ok) throw new Error('Lyrics not found');
+      
+      const lrcText = await response.text();
+      state.lyricsData = Utils.parseLyrics(lrcText);
+      UI.renderLyrics(state.lyricsData);
+    } catch (error) {
+      console.error('載入歌詞失敗:', error);
+      UI.showLyricsError();
+    }
+  },
+
+  /**
+   * 同步歌詞高亮與滾動
+   */
+  sync(currentTime = DOM.audio.currentTime) {
+    if (state.lyricsData.length === 0) return;
+
+    // 找到當前應該高亮的歌詞行
+    let activeIndex = -1;
+    for (let i = 0; i < state.lyricsData.length; i++) {
+      if (state.lyricsData[i].time <= currentTime) {
+        activeIndex = i;
+      } else {
+        break;
+      }
+    }
+
+    // 如果活動歌詞行沒有變化，不需要重繪（效能優化）
+    if (activeIndex === state.lastActiveLyricsIndex) return;
+
+    state.lastActiveLyricsIndex = activeIndex;
+    const allLines = document.querySelectorAll('.lyrics-line');
+
+    // 移除所有高亮
+    allLines.forEach(line => line.classList.remove('active'));
+    
+    // 高亮當前歌詞並滾動到中央
+    if (activeIndex !== -1 && activeIndex < allLines.length) {
+      const activeLine = allLines[activeIndex];
+      activeLine.classList.add('active');
+      
+      // 計算滾動位置：將當前歌詞行滾動到容器中央
+      // lyrics-wrapper 的 top: 50% 已經將其定位在中央
+      // 所以只需要 translateY 負的 (offsetTop + height/2)
+      const lineTop = activeLine.offsetTop;
+      const lineHeight = activeLine.clientHeight;
+      const offset = -(lineTop + lineHeight / 2);
+      
+      DOM.lyricsContainer.style.transform = `translateY(${offset}px)`;
+    }
+  }
+};
+
+// ============================================
+// 播放器核心邏輯 (Player Core)
+// ============================================
+const Player = {
+  /**
+   * 載入指定索引的歌曲
+   */
+  loadSong(index) {
+    state.currentSongIndex = index;
+    Storage.saveSongIndex(index);
+    
+    const song = songs[index];
+    
+    // 更新音訊源
+    DOM.audio.src = song.path;
+    
+    // 更新 UI
+    UI.updateSongInfo(song);
+    UI.updateCoverArt(song);
+    UI.updatePlaylistActiveState();
+    
+    // 載入歌詞
+    Lyrics.load(song.lrc);
+    
+    // 重置播放狀態
+    DOM.coverArt.classList.remove('playing');
+    DOM.progressBar.value = 0;
+    DOM.currentTime.textContent = '0:00';
+    state.isPlaying = false;
+    UI.updatePlayIcon();
+  },
+
+  /**
+   * 切換播放/暫停
+   */
+  togglePlay(forcePlay = null) {
+    // 處理強制播放/暫停
+    if (forcePlay !== null) {
+      state.isPlaying = forcePlay;
+    } else {
+      state.isPlaying = !state.isPlaying;
+    }
+
+    if (state.isPlaying) {
+      DOM.audio.play().catch(e => console.error("播放失敗:", e));
+      DOM.coverArt.classList.add('playing');
+      document.title = `▶ ${songs[state.currentSongIndex].title} - ${songs[state.currentSongIndex].artist}`;
+    } else {
+      DOM.audio.pause();
+      DOM.coverArt.classList.remove('playing');
+      document.title = `⏸ ${songs[state.currentSongIndex].title} - ${songs[state.currentSongIndex].artist}`;
+    }
+    
+    UI.updatePlayIcon();
+  },
+
+  /**
+   * 下一首
+   */
+  nextSong() {
+    if (state.isShuffle) {
+      state.currentSongIndex = Utils.getRandomIndex(state.currentSongIndex, songs.length);
+    } else {
+      state.currentSongIndex = (state.currentSongIndex + 1) % songs.length;
+    }
+    
+    this.loadSong(state.currentSongIndex);
+    this.togglePlay(true);
+  },
+
+  /**
+   * 上一首
+   */
+  prevSong() {
+    if (state.isShuffle) {
+      state.currentSongIndex = Utils.getRandomIndex(state.currentSongIndex, songs.length);
+    } else {
+      state.currentSongIndex = state.currentSongIndex - 1;
+      if (state.currentSongIndex < 0) {
+        state.currentSongIndex = songs.length - 1;
+      }
+    }
+    
+    this.loadSong(state.currentSongIndex);
+    this.togglePlay(true);
+  },
+
+  /**
+   * 切換隨機播放
+   */
+  toggleShuffle() {
+    state.isShuffle = !state.isShuffle;
+    UI.updatePlaybackControls();
+  },
+
+  /**
+   * 切換循環模式
+   */
+  toggleRepeat() {
+    state.repeatMode = (state.repeatMode + 1) % 3;
+    UI.updatePlaybackControls();
+  },
+
+  /**
+   * 更新播放進度條
+   */
+  updateProgress() {
+    const current = DOM.audio.currentTime;
+    DOM.progressBar.value = current;
+    DOM.currentTime.textContent = Utils.formatTime(current);
+    Lyrics.sync(current);
+  },
+
+  /**
+   * 處理歌曲結束事件
+   */
+  handleSongEnded() {
+    switch (state.repeatMode) {
+      case CONSTANTS.REPEAT_MODES.ONE:
+        // 單曲循環
+        DOM.audio.currentTime = 0;
+        DOM.audio.play();
+        break;
+      
+      case CONSTANTS.REPEAT_MODES.OFF:
+        // 不循環：到最後一首就停止
+        if (!state.isShuffle && state.currentSongIndex === songs.length - 1) {
+          return;
+        }
+        this.nextSong();
+        break;
+      
+      case CONSTANTS.REPEAT_MODES.ALL:
+      default:
+        // 循環全部
+        this.nextSong();
+        break;
+    }
+  }
+};
+
+// ============================================
+// 事件監聽器管理 (Event Listeners)
+// ============================================
+const Events = {
+  /**
+   * 初始化所有事件監聽器
+   */
+  init() {
+    // 播放控制
+    DOM.playBtn.addEventListener('click', () => Player.togglePlay());
+    DOM.prevBtn.addEventListener('click', () => Player.prevSong());
+    DOM.nextBtn.addEventListener('click', () => Player.nextSong());
+    DOM.shuffleBtn.addEventListener('click', () => Player.toggleShuffle());
+    DOM.repeatBtn.addEventListener('click', () => Player.toggleRepeat());
+
+    // 播放列表面板
+    DOM.playlistBtn.addEventListener('click', () => {
+      DOM.playlistSidebar.classList.toggle('active');
+    });
+    DOM.closePlaylistBtn.addEventListener('click', () => {
+      DOM.playlistSidebar.classList.remove('active');
+    });
+
+    // 音訊事件
+    DOM.audio.addEventListener('timeupdate', () => Player.updateProgress());
+    DOM.audio.addEventListener('loadedmetadata', () => {
+      DOM.duration.textContent = Utils.formatTime(DOM.audio.duration);
+      DOM.progressBar.max = Math.floor(DOM.audio.duration);
+    });
+    DOM.audio.addEventListener('ended', () => Player.handleSongEnded());
+
+    // 進度條與音量條
+    DOM.progressBar.addEventListener('input', () => {
+      DOM.audio.currentTime = DOM.progressBar.value;
+      Lyrics.sync();
+    });
+
+    DOM.volumeBar.addEventListener('input', (e) => {
+      const volume = e.target.value / 100;
+      DOM.audio.volume = volume;
+      Storage.saveVolume(volume);
+    });
+
+    // 鍵盤快捷鍵
+    this.initKeyboardShortcuts();
+  },
+
+  /**
+   * 初始化鍵盤快捷鍵
+   */
+  initKeyboardShortcuts() {
+    const keyActions = {
+      'Space': (e) => {
+        e.preventDefault();
+        Player.togglePlay();
+      },
+      'ArrowRight': () => {
+        DOM.audio.currentTime = Utils.clamp(
+          DOM.audio.currentTime + CONSTANTS.SEEK_TIME,
+          0,
+          DOM.audio.duration
+        );
+      },
+      'ArrowLeft': () => {
+        DOM.audio.currentTime = Utils.clamp(
+          DOM.audio.currentTime - CONSTANTS.SEEK_TIME,
+          0,
+          DOM.audio.duration
+        );
+      },
+      'ArrowUp': (e) => {
+        e.preventDefault();
+        const newVolume = Utils.clamp(
+          DOM.audio.volume + CONSTANTS.VOLUME_STEP,
+          0,
+          1
+        );
+        DOM.audio.volume = newVolume;
+        DOM.volumeBar.value = newVolume * 100;
+        Storage.saveVolume(newVolume);
+      },
+      'ArrowDown': (e) => {
+        e.preventDefault();
+        const newVolume = Utils.clamp(
+          DOM.audio.volume - CONSTANTS.VOLUME_STEP,
+          0,
+          1
+        );
+        DOM.audio.volume = newVolume;
+        DOM.volumeBar.value = newVolume * 100;
+        Storage.saveVolume(newVolume);
+      }
+    };
+
+    document.addEventListener('keydown', (e) => {
+      const action = keyActions[e.code];
+      if (action) action(e);
+    });
+  }
+};
+
+// ============================================
+// 應用初始化 (App Initialization)
+// ============================================
+function init() {
+  // 載入使用者設定
+  Storage.loadSettings();
+  
+  // 渲染 UI
+  UI.renderPlaylist();
+  UI.updatePlaybackControls();
+  
+  // 載入歌曲
+  Player.loadSong(state.currentSongIndex);
+  
+  // 初始化事件監聽器
+  Events.init();
 }
 
-// Start
+// 啟動應用
 init();

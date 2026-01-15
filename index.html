@@ -3,6 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Glass Music Player - 現代化的音樂播放器，支援歌詞同步、鍵盤快捷鍵、播放列表管理等功能"
+    />
+    <meta
+      name="keywords"
+      content="音樂播放器, Music Player, 歌詞同步, Glassmorphism"
+    />
+    <meta name="author" content="BrianLien09" />
     <title>Glass Music Player</title>
     <link rel="stylesheet" href="style.css" />
     <!-- Google Fonts -->
@@ -19,15 +28,17 @@
     />
   </head>
   <body>
+    <!-- 動態背景動畫 -->
     <div class="background-animation"></div>
 
+    <!-- 主容器 -->
     <div class="container">
-      <!-- Player Card -->
+      <!-- 播放器卡片 -->
       <div class="player-card">
         <div class="player-header">
-            <span class="material-icons-round" id="playlistBtn">queue_music</span>
+          <span class="material-icons-round" id="playlistBtn">queue_music</span>
         </div>
-        
+
         <div class="cover-wrapper">
           <div class="cover-art" id="coverArt">
             <!-- Default Cover Icon/Placeholder -->
@@ -47,9 +58,13 @@
         </div>
 
         <div class="controls">
-          <button class="btn-control icon-small" id="shuffleBtn" title="隨機播放">
+          <button
+            class="btn-control icon-small"
+            id="shuffleBtn"
+            title="隨機播放"
+          >
             <span class="material-icons-round">shuffle</span>
-         </button>
+          </button>
           <button class="btn-control icon-small" id="prevBtn">
             <span class="material-icons-round">skip_previous</span>
           </button>
@@ -59,7 +74,11 @@
           <button class="btn-control icon-small" id="nextBtn">
             <span class="material-icons-round">skip_next</span>
           </button>
-          <button class="btn-control icon-small" id="repeatBtn" title="循環模式">
+          <button
+            class="btn-control icon-small"
+            id="repeatBtn"
+            title="循環模式"
+          >
             <span class="material-icons-round">repeat</span>
           </button>
         </div>
@@ -70,7 +89,7 @@
         </div>
       </div>
 
-      <!-- Lyrics Container -->
+      <!-- 歌詞卡片 -->
       <div class="lyrics-card">
         <div class="lyrics-wrapper" id="lyricsContainer">
           <p class="lyrics-placeholder">歌詞載入中...</p>
@@ -78,18 +97,18 @@
       </div>
     </div>
 
-    <!-- Playlist Sidebar -->
+    <!-- 播放列表側邊欄 -->
     <div class="playlist-sidebar" id="playlistSidebar">
-        <div class="playlist-header">
-            <h3>播放清單</h3>
-            <span class="material-icons-round" id="closePlaylistBtn">close</span>
-        </div>
-        <div class="playlist-content" id="playlistContent">
-            <!-- Items injected by JS -->
-        </div>
+      <div class="playlist-header">
+        <h3>播放清單</h3>
+        <span class="material-icons-round" id="closePlaylistBtn">close</span>
+      </div>
+      <div class="playlist-content" id="playlistContent">
+        <!-- Items injected by JS -->
+      </div>
     </div>
 
-    <!-- Audio Element -->
+    <!-- 音訊元素 -->
     <audio id="audioPlayer" src=""></audio>
 
     <script src="script.js"></script>
