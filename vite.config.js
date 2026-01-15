@@ -13,14 +13,11 @@ export default defineConfig({
     outDir: 'dist',           // 輸出目錄
     assetsDir: 'assets',      // 靜態資源目錄
     sourcemap: false,         // 生產環境不需要 source map
-    minify: 'terser',         // 使用 terser 壓縮（比 esbuild 更小）
+    minify: 'esbuild',        // 使用 esbuild 壓縮（速度更快，Vite 內建）
     
-    // Terser 壓縮選項
-    terserOptions: {
-      compress: {
-        drop_console: true,   // 移除所有 console.log
-        drop_debugger: true   // 移除 debugger
-      }
+    // esbuild 壓縮選項
+    esbuild: {
+      drop: ['console', 'debugger']  // 移除 console 和 debugger
     },
 
     // 程式碼分割策略
