@@ -42,8 +42,6 @@
   - ✅ 功能完整性 100% 保證
   - ✅ 通過完整測試驗證
 
-> 📄 詳細重構報告請參閱 [REFACTORING_REPORT.md](REFACTORING_REPORT.md) 和 [SUMMARY.md](SUMMARY.md)
-
 ### v1.2.0 - 究極完全體 (Final Polish)
 
 - **[新增]** **進階播放模式**：
@@ -72,28 +70,29 @@
 
 ```
 music_app/
-├── index.html          # 網頁主程式
-├── style.css           # 樣式表 (玻璃擬態設計)
-├── script.js           # 核心邏輯 (播放控制、歌詞解析、清單管理)
-├── README.md           # 說明文件
-├── music/              # [資料夾] 放置 .mp3 音樂檔案
-│   ├── 汪六六_放任.mp3
-│   └── ...
-└── lrc/                # [資料夾] 放置 .lrc 歌詞檔案
-    ├── 汪六六_放任.lrc
-    └── ...
+├── public/             # [資料夾] 靜態資源（Vite 會自動複製到 dist/）
+│   ├── music/         # 放置 .mp3 音樂檔案
+│   ├── lrc/           # 放置 .lrc 歌詞檔案
+│   └── cover/         # 放置封面圖片
+├── index.html         # 網頁主程式
+├── style.css          # 樣式表 (玻璃擬態設計)
+├── script.js          # 核心邏輯 (播放控制、歌詞解析、清單管理)
+├── package.json       # 專案設定
+├── vite.config.js     # Vite 建置設定
+└── README.md          # 說明文件
 ```
 
 ## 🛠️ 如何新增歌曲？
 
 1.  **準備檔案**：
 
-    - 將音樂檔無 (`.mp3`) 放入 `music/` 資料夾。
-    - 將歌詞檔 (`.lrc`) 放入 `lrc/` 資料夾。
+    - 將音樂檔 (`.mp3`) 放入 `public/music/` 資料夾
+    - 將歌詞檔 (`.lrc`) 放入 `public/lrc/` 資料夾
+    - 將封面圖片放入 `public/cover/` 資料夾（選用）
 
 2.  **設定清單**：
-    - 開啟 `script.js` 檔案。
-    - 找到 `const songs = [...]` 區塊。
+    - 開啟 `script.js` 檔案
+    - 找到 `const songs = [...]` 區塊
     - 依照格式新增歌曲資訊：
 
 ```javascript
@@ -101,12 +100,15 @@ const songs = [
   {
     title: "歌名", // 顯示在播放器的標題
     artist: "歌手", // 顯示在播放器的歌手名
-    path: "music/檔名.mp3", // 音樂檔路徑
-    lrc: "lrc/檔名.lrc", // 歌詞檔路徑
+    cover: "/cover/封面.jpg", // 封面圖片路徑（絕對路徑，以 / 開頭）
+    path: "/music/檔名.mp3", // 音樂檔路徑（絕對路徑，以 / 開頭）
+    lrc: "/lrc/檔名.lrc", // 歌詞檔路徑（絕對路徑，以 / 開頭）
   },
   // ...加入更多歌曲
 ];
 ```
+
+**重要**: 路徑必須使用**絕對路徑**（以 `/` 開頭），確保本地開發和 GitHub Pages 部署時都能正確載入。
 
 ## 🚀 如何部署與測試？
 
@@ -136,13 +138,7 @@ npm run build
 - ✅ 自動壓縮與優化
 - ✅ 產生 `dist/` 目錄用於部署
 
-📖 **詳細說明**: 查看 [VITE_QUICKSTART.md](VITE_QUICKSTART.md)
-
 ---
-
-### 方法一：直接開啟（快速測試）
-
-由于瀏覽器的安全性限制 (CORS)，直接雙擊 `index.html` 開啟可能會導致**歌詞無法載入**。
 
 ### 方法一：GitHub Pages 自動部署 (推薦 ⭐⭐⭐)
 
@@ -176,21 +172,17 @@ npm run build
 
 **之後每次 push 都會自動部署！** 🎉
 
-📖 詳細設定：查看 [GITHUB_PAGES_SETUP.md](GITHUB_PAGES_SETUP.md)  
-⚡ 快速指令：使用 `/github-pages-deploy` workflow
-
 ---
 
-### 方法二：手動上傳至 GitHub Pages
+### 方法二：手動部署 GitHub Pages
 
-這將會產生一個公開的網址，可以分享給朋友使用。
+1.  執行建置：`npm run build`
+2.  將 `dist/` 目錄內容上傳至 GitHub Repository
+3.  進入 Repository Settings → Pages
+4.  Branch 選擇 `main` → Save
+5.  等待幾分鐘後取得網站連結
 
-1.  將整個 `music_app` 資料夾上傳至 GitHub Repository。
-2.  進入 Repository Settings -> Pages。
-3.  Branch 選擇 `main` -> Save。
-4.  等待幾分鐘後，GitHub 會提供你專屬的網站連結。
-
-### 方法二：本地開發 (使用 Live Server)
+### 方法三：本地開發 (使用 Live Server)
 
 如果你使用 VS Code：
 
