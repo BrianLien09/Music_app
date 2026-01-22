@@ -1026,6 +1026,15 @@ input[type="range"]:hover::-moz-range-thumb {
     min-width: 32px;
   }
   
+  /* 手機端強制顯示進度條圓點 */
+  input[type="range"]::-webkit-slider-thumb {
+    opacity: 1;
+  }
+  
+  input[type="range"]::-moz-range-thumb {
+    opacity: 1;
+  }
+  
   /* 控制按鈕 */
   .controls {
     grid-area: controls;
@@ -1062,6 +1071,11 @@ input[type="range"]:hover::-moz-range-thumb {
   .playlist-header {
     padding: var(--space-5);
     padding-top: calc(var(--space-5) + env(safe-area-inset-top, 0px));
+  }
+  
+  /* 播放列表內容底部留白，避免遮住播放器 */
+  .playlist-content {
+    padding-bottom: 200px;
   }
 }
 
