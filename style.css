@@ -941,24 +941,29 @@ input[type="range"]:hover::-moz-range-thumb {
     margin: var(--space-4) 0;
   }
   
-  /* 播放器控制區 - 固定在底部，更大的卡片 */
+  /* 播放器控制區 - 固定在底部 */
   .player-card {
-    order: 2; /* 控制項排在下方 */
+    order: 2;
     flex: none;
     width: 100%;
-    min-height: 200px;
-    padding: var(--space-5);
-    padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px)); /* iOS 安全區域 */
+    padding: var(--space-4) var(--space-5);
+    padding-bottom: calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     background: var(--bg-secondary);
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
     border-top: 1px solid var(--glass-border);
     position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    gap: var(--space-3);
+    /* 使用 CSS Grid 來精確控制佈局 */
+    display: grid;
+    grid-template-columns: 56px 1fr 40px;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "cover info header"
+      "progress progress progress"
+      "controls controls controls";
+    gap: var(--space-3) var(--space-4);
+    align-items: center;
   }
   
   .player-card::before {
@@ -967,21 +972,21 @@ input[type="range"]:hover::-moz-range-thumb {
   
   /* 播放列表按鈕 */
   .player-header {
-    position: absolute;
-    top: var(--space-5);
-    right: var(--space-5);
+    grid-area: header;
+    position: static;
     width: 36px;
     height: 36px;
+    justify-self: end;
+    align-self: start;
   }
   
-  /* 上半部：封面 + 歌曲資訊 橫向排列 */
+  /* 封面 */
   .cover-wrapper {
-    width: 64px;
-    height: 64px;
+    grid-area: cover;
+    width: 56px;
+    height: 56px;
     margin: 0;
     flex-shrink: 0;
-    position: static;
-    transform: none;
   }
   
   .cover-art {
@@ -992,28 +997,28 @@ input[type="range"]:hover::-moz-range-thumb {
     font-size: 28px;
   }
   
-  /* 歌曲資訊區域包裝 */
+  /* 歌曲資訊 */
   .song-info {
+    grid-area: info;
     text-align: left;
     padding: 0;
-    flex: 1;
     min-width: 0;
   }
   
   .song-info h1 {
-    font-size: 1.05rem;
+    font-size: 1rem;
     margin-bottom: var(--space-1);
   }
   
   .song-info h2 {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
   
   /* 進度條 */
   .progress-container {
-    margin: var(--space-1) 0;
+    grid-area: progress;
+    margin: 0;
     gap: var(--space-2);
-    order: 2;
   }
   
   .progress-container span {
@@ -1023,23 +1028,23 @@ input[type="range"]:hover::-moz-range-thumb {
   
   /* 控制按鈕 */
   .controls {
-    gap: var(--space-6);
+    grid-area: controls;
+    gap: var(--space-5);
     margin-bottom: 0;
-    order: 3;
-    padding: var(--space-2) 0;
+    justify-content: center;
   }
   
   .play-btn {
-    width: 52px;
-    height: 52px;
+    width: 48px;
+    height: 48px;
   }
   
   .play-btn .material-icons-round {
-    font-size: 28px;
+    font-size: 26px;
   }
   
   .icon-small .material-icons-round {
-    font-size: 24px;
+    font-size: 22px;
   }
   
   /* 音量控制在手機上隱藏 */
