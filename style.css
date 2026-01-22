@@ -193,19 +193,20 @@ body {
    播放器區塊 (Player Section)
    ============================================ */
 .player-card {
-  flex: 0 0 420px;
-  padding: var(--space-8);
+  flex: 0 0 380px;
+  padding: var(--space-6);
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: var(--space-4);
 }
 
 /* 播放列表按鈕 */
 .player-header {
   position: absolute;
-  top: var(--space-5);
-  right: var(--space-5);
-  width: 40px;
-  height: 40px;
+  top: var(--space-4);
+  right: var(--space-4);
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -225,18 +226,18 @@ body {
 }
 
 .player-header .material-icons-round {
-  font-size: 22px;
+  font-size: 20px;
 }
 
 /* ============================================
    專輯封面 (Cover Art) - 核心視覺元素
    ============================================ */
 .cover-wrapper {
-  width: 280px;
-  height: 280px;
+  width: 220px;
+  height: 220px;
   position: relative;
   flex-shrink: 0;
-  margin: var(--space-6) 0;
+  margin: var(--space-4) 0;
 }
 
 /* 封面陰影與發光效果 */

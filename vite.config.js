@@ -52,6 +52,9 @@ export default defineConfig({
 
   // 靜態資源處理
   assetsInclude: ['**/*.lrc'], // 確保 .lrc 檔案被視為資源
+  
+  // PWA 相關：確保 Service Worker 和 manifest 被正確複製
+  publicDir: 'public',
 
   // 預處理器選項（如果使用 SCSS/LESS）
   css: {
