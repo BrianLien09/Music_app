@@ -9,15 +9,18 @@ const DOM = {
   nextBtn: document.getElementById('nextBtn'),
   progressBar: document.getElementById('progressBar'),
   volumeBar: document.getElementById('volumeBar'),
+  volumeIcon: document.getElementById('volumeIcon'),
   currentTime: document.getElementById('currentTime'),
   duration: document.getElementById('duration'),
   lyricsContainer: document.getElementById('lyricsContainer'),
   coverArt: document.getElementById('coverArt'),
+  coverWrapper: document.querySelector('.cover-wrapper'),
   songTitle: document.getElementById('songTitle'),
   artistName: document.getElementById('artistName'),
   playlistBtn: document.getElementById('playlistBtn'),
   closePlaylistBtn: document.getElementById('closePlaylistBtn'),
   playlistSidebar: document.getElementById('playlistSidebar'),
+  playlistOverlay: document.getElementById('playlistOverlay'),
   playlistContent: document.getElementById('playlistContent'),
   shuffleBtn: document.getElementById('shuffleBtn'),
   repeatBtn: document.getElementById('repeatBtn')
@@ -242,8 +245,29 @@ const UI = {
   updateCoverArt(song) {
     if (song.cover) {
       DOM.coverArt.innerHTML = `<img src="${song.cover}" alt="${song.title}">`;
+      // 更新封面背景發光效果（取用封面主色調）
+      if (DOM.coverWrapper) {
+        DOM.coverWrapper.style.setProperty('--cover-glow', song.cover);
+      }
     } else {
       DOM.coverArt.innerHTML = '<span class="material-icons-round">music_note</span>';
+    }
+  },
+
+  /**
+   * 更新音量圖示
+   */
+  updateVolumeIcon(volume) {
+    if (!DOM.volumeIcon) return;
+    
+    if (volume === 0) {
+      DOM.volumeIcon.textContent = 'volume_off';
+    } else if (volume < 0.3) {
+      DOM.volumeIcon.textContent = 'volume_mute';
+    } else if (volume < 0.7) {
+      DOM.volumeIcon.textContent = 'volume_down';
+    } else {
+      DOM.volumeIcon.textContent = 'volume_up';
     }
   },
 
@@ -592,9 +616,16 @@ const Events = {
     // 播放列表面板
     DOM.playlistBtn.addEventListener('click', () => {
       DOM.playlistSidebar.classList.toggle('active');
+      DOM.playlistOverlay?.classList.toggle('active');
     });
     DOM.closePlaylistBtn.addEventListener('click', () => {
       DOM.playlistSidebar.classList.remove('active');
+      DOM.playlistOverlay?.classList.remove('active');
+    });
+    // 點擊遮罩關閉側邊欄
+    DOM.playlistOverlay?.addEventListener('click', () => {
+      DOM.playlistSidebar.classList.remove('active');
+      DOM.playlistOverlay.classList.remove('active');
     });
 
     // 音訊事件
@@ -615,6 +646,24 @@ const Events = {
       const volume = e.target.value / 100;
       DOM.audio.volume = volume;
       Storage.saveVolume(volume);
+      UI.updateVolumeIcon(volume);
+    });
+    
+    // 點擊音量圖示可快速靜音/取消靜音
+    DOM.volumeIcon?.addEventListener('click', () => {
+      if (DOM.audio.volume > 0) {
+        // 記住當前音量並靜音
+        DOM.volumeIcon.dataset.previousVolume = DOM.audio.volume;
+        DOM.audio.volume = 0;
+        DOM.volumeBar.value = 0;
+      } else {
+        // 恢復之前的音量
+        const prevVolume = parseFloat(DOM.volumeIcon.dataset.previousVolume) || CONSTANTS.DEFAULT_VOLUME;
+        DOM.audio.volume = prevVolume;
+        DOM.volumeBar.value = prevVolume * 100;
+      }
+      UI.updateVolumeIcon(DOM.audio.volume);
+      Storage.saveVolume(DOM.audio.volume);
     });
 
     // 鍵盤快捷鍵
@@ -685,11 +734,12 @@ function init() {
   // 渲染 UI
   UI.renderPlaylist();
   UI.updatePlaybackControls();
+  UI.updateVolumeIcon(DOM.audio.volume);
   
   // 載入歌曲
   Player.loadSong(state.currentSongIndex);
   
-  // 初始化事件監聽器
+  // 初始化事件監聯器
   Events.init();
 }
 
