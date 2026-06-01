@@ -112,6 +112,13 @@ const songs = [
     cover: `${BASE_URL}cover/崇拜.jpg`,
     path: `${BASE_URL}music/崇拜_薛之謙.mp3`,
     lrc: `${BASE_URL}lrc/崇拜_薛之謙.lrc`
+  },
+  {
+    title: '童話',
+    artist: '子萱&Suno',
+    cover: `${BASE_URL}cover/童話_子萱&Suno.jpg`,
+    path: `${BASE_URL}music/童話_子萱&Suno.mp3`,
+    lrc: `${BASE_URL}lrc/童話_子萱&Suno.lrc`
   }
 ];
 
@@ -169,12 +176,12 @@ const Utils = {
    */
   getRandomIndex(currentIndex, arrayLength) {
     if (arrayLength <= 1) return 0;
-    
+
     let newIndex;
     do {
       newIndex = Math.floor(Math.random() * arrayLength);
     } while (newIndex === currentIndex);
-    
+
     return newIndex;
   },
 
@@ -204,7 +211,7 @@ const Storage = {
       DOM.audio.volume = CONSTANTS.DEFAULT_VOLUME;
       DOM.volumeBar.value = CONSTANTS.DEFAULT_VOLUME * 100;
     }
-    
+
     // 載入上次播放的歌曲索引
     const savedIndex = localStorage.getItem(CONSTANTS.STORAGE_KEYS.LAST_SONG_INDEX);
     if (savedIndex !== null) {
@@ -259,7 +266,7 @@ const UI = {
    */
   updateVolumeIcon(volume) {
     if (!DOM.volumeIcon) return;
-    
+
     if (volume === 0) {
       DOM.volumeIcon.textContent = 'volume_off';
     } else if (volume < 0.3) {
@@ -401,11 +408,11 @@ const Lyrics = {
     UI.showLyricsLoading();
     state.lyricsData = [];
     state.lastActiveLyricsIndex = -1;
-    
+
     try {
       const response = await fetch(lrcPath);
       if (!response.ok) throw new Error('Lyrics not found');
-      
+
       const lrcText = await response.text();
       state.lyricsData = Utils.parseLyrics(lrcText);
       UI.renderLyrics(state.lyricsData);
@@ -439,19 +446,19 @@ const Lyrics = {
 
     // 移除所有高亮
     allLines.forEach(line => line.classList.remove('active'));
-    
+
     // 高亮當前歌詞並滾動到中央
     if (activeIndex !== -1 && activeIndex < allLines.length) {
       const activeLine = allLines[activeIndex];
       activeLine.classList.add('active');
-      
+
       // 計算滾動位置：將當前歌詞行滾動到容器中央
       // lyrics-wrapper 的 top: 50% 已經將其定位在中央
       // 所以只需要 translateY 負的 (offsetTop + height/2)
       const lineTop = activeLine.offsetTop;
       const lineHeight = activeLine.clientHeight;
       const offset = -(lineTop + lineHeight / 2);
-      
+
       DOM.lyricsContainer.style.transform = `translateY(${offset}px)`;
     }
   }
@@ -467,20 +474,20 @@ const Player = {
   loadSong(index) {
     state.currentSongIndex = index;
     Storage.saveSongIndex(index);
-    
+
     const song = songs[index];
-    
+
     // 更新音訊源
     DOM.audio.src = song.path;
-    
+
     // 更新 UI
     UI.updateSongInfo(song);
     UI.updateCoverArt(song);
     UI.updatePlaylistActiveState();
-    
+
     // 載入歌詞
     Lyrics.load(song.lrc);
-    
+
     // 重置播放狀態
     DOM.coverArt.classList.remove('playing');
     DOM.progressBar.value = 0;
@@ -509,7 +516,7 @@ const Player = {
       DOM.coverArt.classList.remove('playing');
       document.title = `⏸ ${songs[state.currentSongIndex].title} - ${songs[state.currentSongIndex].artist}`;
     }
-    
+
     UI.updatePlayIcon();
   },
 
@@ -522,7 +529,7 @@ const Player = {
     } else {
       state.currentSongIndex = (state.currentSongIndex + 1) % songs.length;
     }
-    
+
     this.loadSong(state.currentSongIndex);
     this.togglePlay(true);
   },
@@ -539,7 +546,7 @@ const Player = {
         state.currentSongIndex = songs.length - 1;
       }
     }
-    
+
     this.loadSong(state.currentSongIndex);
     this.togglePlay(true);
   },
@@ -580,7 +587,7 @@ const Player = {
         DOM.audio.currentTime = 0;
         DOM.audio.play();
         break;
-      
+
       case CONSTANTS.REPEAT_MODES.OFF:
         // 不循環：到最後一首就停止
         if (!state.isShuffle && state.currentSongIndex === songs.length - 1) {
@@ -588,7 +595,7 @@ const Player = {
         }
         this.nextSong();
         break;
-      
+
       case CONSTANTS.REPEAT_MODES.ALL:
       default:
         // 循環全部
@@ -648,7 +655,7 @@ const Events = {
       Storage.saveVolume(volume);
       UI.updateVolumeIcon(volume);
     });
-    
+
     // 點擊音量圖示可快速靜音/取消靜音
     DOM.volumeIcon?.addEventListener('click', () => {
       if (DOM.audio.volume > 0) {
@@ -730,15 +737,15 @@ const Events = {
 function init() {
   // 載入使用者設定
   Storage.loadSettings();
-  
+
   // 渲染 UI
   UI.renderPlaylist();
   UI.updatePlaybackControls();
   UI.updateVolumeIcon(DOM.audio.volume);
-  
+
   // 載入歌曲
   Player.loadSong(state.currentSongIndex);
-  
+
   // 初始化事件監聯器
   Events.init();
 }
