@@ -85,8 +85,8 @@ self.addEventListener('fetch', (event) => {
     // 音樂檔案：Cache First（較大檔案，優先使用快取）
     event.respondWith(cacheFirst(request, MUSIC_CACHE_NAME));
   } else if (isLrcAsset(url.pathname)) {
-    // 歌詞檔案：Network First（可能會更新）
-    event.respondWith(networkFirst(request, STATIC_CACHE_NAME));
+    // 歌詞檔案：強制繞過瀏覽器快取，避免雲端更新後仍讀到舊版
+    event.respondWith(networkFirstNoStore(request, STATIC_CACHE_NAME));
   } else {
     // 其他資源：Network First
     event.respondWith(networkFirst(request, CACHE_NAME));
@@ -148,6 +148,33 @@ async function networkFirst(request, cacheName) {
       return cachedResponse;
     }
     
+    return new Response('離線中，且無快取資源', { status: 503 });
+  }
+}
+
+/**
+ * Network First（no-store）策略
+ * 歌詞更新需要即時，故強制跳過瀏覽器快取
+ */
+async function networkFirstNoStore(request, cacheName) {
+  try {
+    const noStoreRequest = new Request(request, { cache: 'no-store' });
+    const networkResponse = await fetch(noStoreRequest);
+
+    if (networkResponse.ok) {
+      const cache = await caches.open(cacheName);
+      cache.put(request, networkResponse.clone());
+    }
+
+    return networkResponse;
+  } catch (error) {
+    console.log('[SW] 網路失敗，使用快取:', request.url);
+    const cachedResponse = await caches.match(request);
+
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
     return new Response('離線中，且無快取資源', { status: 503 });
   }
 }
