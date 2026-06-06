@@ -541,7 +541,7 @@ input[type="range"]:hover::-moz-range-thumb {
   top: 0;
   height: 100px;
   background: linear-gradient(to bottom, 
-    rgba(10, 10, 15, 0.9) 0%, 
+    rgba(10, 10, 15, 0.8) 0%, 
     transparent 100%
   );
   pointer-events: none;
@@ -554,8 +554,7 @@ input[type="range"]:hover::-moz-range-thumb {
   left: 0;
   width: 100%;
   padding: 0 var(--space-10);
-  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  transform: translateY(0);
+  /* transform 由 JS rAF Lerp 全程控制，此處不設 transition 避免疊加 */
   will-change: transform;
 }
 
@@ -569,7 +568,11 @@ input[type="range"]:hover::-moz-range-thumb {
   font-size: 1.25rem;
   line-height: 1.6;
   color: var(--text-muted);
-  transition: all 0.5s var(--ease-out);
+  /* 使用較長的過渡時間讓字體和顏色變化更優雅 */
+  transition: color 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+              font-size 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              text-shadow 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   cursor: pointer;
   border-radius: var(--radius-md);
   text-align: center;
@@ -590,7 +593,7 @@ input[type="range"]:hover::-moz-range-thumb {
   background: transparent;
   transform: scale(1.05);
   margin: var(--space-5) 0;
-  text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+  text-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
 }
 
 /* 歌詞載入中提示 */

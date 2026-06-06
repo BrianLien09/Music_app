@@ -119,7 +119,14 @@ const songs = [
     cover: `${BASE_URL}cover/童話_子萱&Suno.jpg`,
     path: `${BASE_URL}music/童話_子萱&Suno.mp3`,
     lrc: `${BASE_URL}lrc/童話_子萱&Suno.lrc`
-  }
+  },
+  {
+    title: '親愛的',
+    artist: 'H3R3',
+    cover: `https://i.kfs.io/album/global/169505497,0v1/fit/500x500.jpg`,
+    path: `${BASE_URL}music/親愛的_h3R3.m4a`,
+    lrc: `${BASE_URL}lrc/親愛的_h3R3.lrc`
+  },
 ];
 
 // ============================================
@@ -363,7 +370,6 @@ const UI = {
    */
   showLyricsLoading() {
     DOM.lyricsContainer.innerHTML = '<p class="lyrics-placeholder">歌詞載入中...</p>';
-    DOM.lyricsContainer.style.transform = 'translateY(0)';
   },
 
   /**
@@ -401,13 +407,64 @@ const UI = {
 // 歌詞管理 (Lyrics Manager)
 // ============================================
 const Lyrics = {
+  // 緩存所有歌詞行元素的位置資訊，避免重複計算
+  lyricsLineCache: [],
+
+  // rAF 平滑滾動狀態
+  // 用 Lerp 取代 CSS transition：每幀往目標靠近，產生自然減速感
+  currentOffset: 0,  // 目前渲染的位置（像素）
+  targetOffset: 0,   // 歌詞切換時更新的目標位置
+  rafId: null,       // requestAnimationFrame 的 ID，用來避免重複啟動
+
+  /**
+   * 啟動 rAF 滾動循環
+   * Lerp 係數 0.1：距離越遠移動越快，越近越慢，視覺上非常絲滑
+   */
+  startScrollLoop() {
+    if (this.rafId !== null) return;
+
+    const loop = () => {
+      const diff = this.targetOffset - this.currentOffset;
+
+      if (Math.abs(diff) > 0.05) {
+        // 每幀前進 10%，形成指數衰減的「彈簧感」滾動
+        this.currentOffset += diff * 0.1;
+        DOM.lyricsContainer.style.transform = `translateY(${this.currentOffset}px)`;
+        this.rafId = requestAnimationFrame(loop);
+      } else {
+        // 差距小於 0.05px 時直接貼齊，停止循環節省資源
+        this.currentOffset = this.targetOffset;
+        DOM.lyricsContainer.style.transform = `translateY(${this.currentOffset}px)`;
+        this.rafId = null;
+      }
+    };
+
+    this.rafId = requestAnimationFrame(loop);
+  },
+
+  /**
+   * 停止 rAF 循環（換歌時呼叫）
+   */
+  stopScrollLoop() {
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
+  },
+
   /**
    * 載入並解析歌詞檔案
    */
   async load(lrcPath) {
+    // 停止舊的滾動循環，瞬間歸位，避免換歌時從舊位置「飛回」
+    this.stopScrollLoop();
+    this.currentOffset = 0;
+    this.targetOffset = 0;
+
     UI.showLyricsLoading();
     state.lyricsData = [];
     state.lastActiveLyricsIndex = -1;
+    this.lyricsLineCache = [];
 
     try {
       const response = await fetch(lrcPath);
@@ -416,6 +473,9 @@ const Lyrics = {
       const lrcText = await response.text();
       state.lyricsData = Utils.parseLyrics(lrcText);
       UI.renderLyrics(state.lyricsData);
+
+      // 重新建立快取，完成後啟動滾動循環
+      this.buildLyricsCache();
     } catch (error) {
       console.error('載入歌詞失敗:', error);
       UI.showLyricsError();
@@ -423,43 +483,70 @@ const Lyrics = {
   },
 
   /**
-   * 同步歌詞高亮與滾動
+   * 建立歌詞行位置快取，避免在 sync() 中反覆觸發 reflow
+   * 必須等兩個 rAF 確保瀏覽器完成 layout 後再讀 offsetTop，
+   * 否則字型未載入時所有值都為 0
+   */
+  buildLyricsCache() {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const allLines = document.querySelectorAll('.lyrics-line');
+        this.lyricsLineCache = Array.from(allLines).map(line => ({
+          element: line,
+          offsetTop: line.offsetTop,
+          clientHeight: line.clientHeight
+        }));
+        // 快取就緒後才啟動 rAF 滾動循環
+        this.startScrollLoop();
+      });
+    });
+  },
+
+  /**
+   * 同步歌詞高亮（由 timeupdate 觸發，約每 250ms 一次）
+   * 只負責更新 targetOffset；實際位移由 rAF loop 每幀平滑插值
    */
   sync(currentTime = DOM.audio.currentTime) {
     if (state.lyricsData.length === 0) return;
 
-    // 找到當前應該高亮的歌詞行
+    // 二分查詢找到當前時間對應的歌詞行
     let activeIndex = -1;
-    for (let i = 0; i < state.lyricsData.length; i++) {
-      if (state.lyricsData[i].time <= currentTime) {
-        activeIndex = i;
+    let left = 0;
+    let right = state.lyricsData.length - 1;
+
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2);
+      if (state.lyricsData[mid].time <= currentTime) {
+        activeIndex = mid;
+        left = mid + 1;
       } else {
-        break;
+        right = mid - 1;
       }
     }
 
-    // 如果活動歌詞行沒有變化，不需要重繪（效能優化）
+    // 活動歌詞行未變化則略過，避免不必要的 DOM 操作
     if (activeIndex === state.lastActiveLyricsIndex) return;
 
+    const previousIndex = state.lastActiveLyricsIndex;
     state.lastActiveLyricsIndex = activeIndex;
-    const allLines = document.querySelectorAll('.lyrics-line');
 
-    // 移除所有高亮
-    allLines.forEach(line => line.classList.remove('active'));
+    // 移除舊行的高亮
+    if (previousIndex !== -1 && previousIndex < this.lyricsLineCache.length) {
+      this.lyricsLineCache[previousIndex].element.classList.remove('active');
+    }
 
-    // 高亮當前歌詞並滾動到中央
-    if (activeIndex !== -1 && activeIndex < allLines.length) {
-      const activeLine = allLines[activeIndex];
-      activeLine.classList.add('active');
+    // 高亮新行並更新目標滾動位置
+    if (activeIndex !== -1 && activeIndex < this.lyricsLineCache.length) {
+      const cachedLine = this.lyricsLineCache[activeIndex];
+      cachedLine.element.classList.add('active');
 
-      // 計算滾動位置：將當前歌詞行滾動到容器中央
-      // lyrics-wrapper 的 top: 50% 已經將其定位在中央
-      // 所以只需要 translateY 負的 (offsetTop + height/2)
-      const lineTop = activeLine.offsetTop;
-      const lineHeight = activeLine.clientHeight;
-      const offset = -(lineTop + lineHeight / 2);
+      const lineTop = cachedLine.offsetTop;
+      const lineHeight = cachedLine.clientHeight;
+      // 目標：讓當前歌詞行垂直置中
+      this.targetOffset = -(lineTop + lineHeight / 2);
 
-      DOM.lyricsContainer.style.transform = `translateY(${offset}px)`;
+      // 確保 rAF 循環正在跑（暫停播放後重新播放的情境）
+      this.startScrollLoop();
     }
   }
 };
